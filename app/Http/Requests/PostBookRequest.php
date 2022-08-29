@@ -4,6 +4,13 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+
+/**
+ * @property string $isbn
+ * @property string $title
+ * @property string $description
+ * @property array $authors
+ */
 class PostBookRequest extends FormRequest
 {
     /**
