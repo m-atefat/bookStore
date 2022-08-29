@@ -4,6 +4,10 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @property integer $review
+ * @property string $comment
+ */
 class PostBookReviewRequest extends FormRequest
 {
     /**
