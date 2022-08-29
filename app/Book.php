@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @method static Builder filter()
+ * @method static Builder filter(array $data)
  */
 class Book extends Model
 {
@@ -37,6 +37,12 @@ class Book extends Model
         'reviews_avg'
     ];
 
+    protected static function booted()
+    {
+        static::addGlobalScope('addReviewAvg', function (Builder $builder) {
+            $builder->withAvg('reviews', 'review');
+        });
+    }
 
     public function authors(): BelongsToMany
     {
@@ -50,6 +56,8 @@ class Book extends Model
 
     public function scopeFilter(Builder $builder, array $data): Builder
     {
+        $sortDirection = $data['sortDirection'] ?? 'ASC';
+
         if (isset($data['sortColumn']) && $data['sortColumn'] == 'title') {
             $builder->orderBy('title', $data['sortDirection'] ?? 'ASC');
         }
@@ -63,6 +71,10 @@ class Book extends Model
                 $authorIds = explode(',', $data['authors']);
                 $query->whereIn('id', $authorIds);
             });
+        }
+
+        if (isset($data['sortColumn']) && $data['sortColumn'] == 'avg_review') {
+            $builder->orderBy('reviews_avg_review', $sortDirection);
         }
 
         return $builder;
