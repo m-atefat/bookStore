@@ -33,10 +33,6 @@ class Book extends Model
         'reviews'
     ];
 
-    protected $appends = [
-        'reviews_avg'
-    ];
-
     protected static function booted()
     {
         static::addGlobalScope('addReviewAvg', function (Builder $builder) {
@@ -52,36 +48,5 @@ class Book extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(BookReview::class);
-    }
-
-    public function scopeFilter(Builder $builder, array $data): Builder
-    {
-        $sortDirection = $data['sortDirection'] ?? 'ASC';
-
-        if (isset($data['sortColumn']) && $data['sortColumn'] == 'title') {
-            $builder->orderBy('title', $data['sortDirection'] ?? 'ASC');
-        }
-
-        if (isset($data['title'])) {
-            $builder->where('title', 'LIKE', "%" . $data['title'] . "%");
-        }
-
-        if (isset($data['authors'])) {
-            $builder->whereHas('authors', function ($query) use ($data) {
-                $authorIds = explode(',', $data['authors']);
-                $query->whereIn('id', $authorIds);
-            });
-        }
-
-        if (isset($data['sortColumn']) && $data['sortColumn'] == 'avg_review') {
-            $builder->orderBy('reviews_avg_review', $sortDirection);
-        }
-
-        return $builder;
-    }
-
-    public function getReviewsAvgAttribute(): int
-    {
-        return (int)round($this->reviews()->avg('review'));
     }
 }
