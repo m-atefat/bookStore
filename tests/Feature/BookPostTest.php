@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Author;
-use App\Book;
-use App\User;
+use App\Models\Author;
+use App\Models\Book;
+use App\Models\User;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
@@ -12,7 +12,7 @@ class BookPostTest extends TestCase
 {
     public function testDenyGuestAccess()
     {
-        $author = factory(Author::class)->create();
+        $author = Author::factory()->create();
 
         $response = $this->postJson('/api/books', [
             'isbn'        => '9788328302341',
@@ -26,8 +26,8 @@ class BookPostTest extends TestCase
 
     public function testDenyNonAdminUserAccess()
     {
-        $user = factory(User::class)->create();
-        $author = factory(Author::class)->create();
+        $user = User::factory()->create();
+        $author = Author::factory()->create();
 
         $response = $this
             ->actingAs($user)
@@ -43,8 +43,8 @@ class BookPostTest extends TestCase
 
     public function testSuccessfulPost()
     {
-        $user = factory(User::class)->state('admin')->create();
-        $author = factory(Author::class)->create();
+        $user = User::factory()->admin()->create();
+        $author = Author::factory()->create();
 
         $response = $this
             ->actingAs($user)
@@ -71,10 +71,9 @@ class BookPostTest extends TestCase
      */
     public function testValidation(array $invalidData, string $invalidParameter)
     {
-
-        $book = factory(Book::class)->create(['isbn' => '9788328302341']);
-        $user = factory(User::class)->state('admin')->create();
-        $authors = factory(Author::class, 2)->create();
+        $book = Book::factory()->create(['isbn' => '9788328302341']);
+        $user = User::factory()->admin()->create();
+        $authors = Author::factory()->count(2)->create();
         $authorIds = $authors->pluck('id');
 
         $validData = [
@@ -83,6 +82,7 @@ class BookPostTest extends TestCase
             'description' => 'Lorem ipsum',
             'authors'     => $authorIds,
         ];
+
         $data = array_merge($validData, $invalidData);
 
         $response = $this
@@ -94,7 +94,7 @@ class BookPostTest extends TestCase
         $response->assertJsonValidationErrors([$invalidParameter]);
     }
 
-    public function validationDataProvider()
+    public static function validationDataProvider(): array
     {
         return [
             [['isbn' => null], 'isbn'],

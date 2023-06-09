@@ -2,17 +2,17 @@
 
 namespace Tests;
 
-use App\Author;
-use App\Book;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Author;
+use App\Models\Book;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
-    protected function bookToResourceArray(Book $book)
+    protected function bookToResourceArray(Book $book): array
     {
         return [
             'id' => $book->id,

@@ -2,18 +2,16 @@
 
 namespace Tests\Feature;
 
-use App\Author;
-use App\Book;
-use App\BookReview;
-use App\User;
-use Illuminate\Foundation\Testing\TestResponse;
+use App\Models\Book;
+use App\Models\BookReview;
+use App\Models\User;
 use Tests\TestCase;
 
 class BookReviewTest extends TestCase
 {
     public function testDenyGuestAccess()
     {
-        $book = factory(Book::class)->create();
+        $book = Book::factory()->create();
 
         $response = $this->postJson($this->postUrl($book->id), [
             'review' => 5,
@@ -25,9 +23,8 @@ class BookReviewTest extends TestCase
 
     public function testSuccessfulPost()
     {
-
-        $user = factory(User::class)->state('admin')->create();
-        $book = factory(Book::class)->create();
+        $user = User::factory()->admin()->create();
+        $book = Book::factory()->create();
 
         $response = $this
             ->actingAs($user)
@@ -64,8 +61,8 @@ class BookReviewTest extends TestCase
      */
     public function testValidation(array $invalidData, string $invalidParameter)
     {
-        $book = factory(Book::class)->create(['isbn' => '9788328302341']);
-        $user = factory(User::class)->state('admin')->create();
+        $book = Book::factory()->create(['isbn' => '9788328302341']);
+        $user = User::factory()->admin()->create();
 
         $validData = [
             'review' => 5,
@@ -81,7 +78,7 @@ class BookReviewTest extends TestCase
         $response->assertJsonValidationErrors([$invalidParameter]);
     }
 
-    public function validationDataProvider()
+    public static function validationDataProvider(): array
     {
         return [
             [['review' => null], 'review'],
@@ -96,7 +93,7 @@ class BookReviewTest extends TestCase
         ];
     }
 
-    private function postUrl(int $bookId)
+    private function postUrl(int $bookId): string
     {
         return sprintf('/api/books/%d/reviews', $bookId);
     }

@@ -1,17 +1,21 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @method static Builder filter(array $data)
  */
 class Book extends Model
 {
+
+    use HasFactory;
+
     public $timestamps = false;
 
     /**
@@ -33,7 +37,7 @@ class Book extends Model
         'reviews'
     ];
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::addGlobalScope('addReviewAvg', function (Builder $builder) {
             $builder->withAvg('reviews', 'review');
