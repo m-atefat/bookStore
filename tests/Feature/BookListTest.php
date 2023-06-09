@@ -2,28 +2,28 @@
 
 namespace Tests\Feature;
 
-use App\Author;
-use App\Book;
-use App\BookReview;
-use App\User;
+use App\Models\Author;
+use App\Models\Book;
+use App\Models\BookReview;
+use App\Models\User;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
-class BooksListTest extends TestCase
+class BookListTest extends TestCase
 {
     public function testResponseStructure()
     {
-        factory(Book::class, 5)->make()
-
+        Book::factory()->count(5)->make()
             ->each(function (Book $book) {
             $book->save();
             $book->authors()->saveMany([
-                factory(Author::class)->create(),
+                Author::factory()->create()
             ]);
 
-            $reviews = factory(BookReview::class, 3)->make()->each(function (BookReview $review) {
-                $review->user()->associate(factory(User::class)->create());
+            $reviews = BookReview::factory()->count(3)->make()->each(function (BookReview $review) {
+                $review->user()->associate(User::factory()->create());
             });
+
             $book->reviews()->saveMany($reviews);
         });
 
@@ -71,15 +71,16 @@ class BooksListTest extends TestCase
 
     public function testListWithoutFilters()
     {
-        $books = factory(Book::class, 5)->make()->each(function (Book $book) {
+        $books = Book::factory()->count(5)->make()->each(function (Book $book) {
             $book->save();
             $book->authors()->saveMany([
-                factory(Author::class)->create(),
+                Author::factory()->create()
             ]);
 
-            $reviews = factory(BookReview::class, 3)->make()->each(function (BookReview $review) {
-                $review->user()->associate(factory(User::class)->create());
+            $reviews = BookReview::factory()->count(3)->make()->each(function (BookReview $review) {
+                $review->user()->associate(User::factory()->create());
             });
+
             $book->reviews()->saveMany($reviews);
         });
 
@@ -91,9 +92,9 @@ class BooksListTest extends TestCase
 
     public function testTitleFilter()
     {
-        $book1 = factory(Book::class)->create(['title' => 'PHP for begginers']);
-        $book2 = factory(Book::class)->create(['title' => 'Javascript for dummies']);
-        $book3 = factory(Book::class)->create(['title' => 'Advanced Python']);
+        $book1 = Book::factory()->create(['title' => 'PHP for begginers']);
+        $book2 = Book::factory()->create(['title' => 'Javascript for dummies']);
+        $book3 = Book::factory()->create(['title' => 'Advanced Python']);
 
         $response = $this->getJson('/api/books?title=php');
 
@@ -108,16 +109,16 @@ class BooksListTest extends TestCase
 
     public function testAuthorsFilter()
     {
-        $author1 = factory(Author::class)->create();
-        $author2 = factory(Author::class)->create();
+        $author1 = Author::factory()->create();
+        $author2 = Author::factory()->create();
 
-        $book1 = factory(Book::class)->create(['title' => 'PHP for begginers']);
+        $book1 = Book::factory()->create(['title' => 'PHP for begginers']);
         $book1->authors()->saveMany([$author1, $author2]);
 
-        $book2 = factory(Book::class)->create(['title' => 'Javascript for dummies']);
+        $book2 = Book::factory()->create(['title' => 'Javascript for dummies']);
         $book2->authors()->saveMany([$author1]);
 
-        $book3 = factory(Book::class)->create(['title' => 'Advanced Python']);
+        $book3 = Book::factory()->create(['title' => 'Advanced Python']);
         $book3->authors()->saveMany([$author2]);
 
         $response = $this->getJson('/api/books?authors='.$author1->id);
@@ -138,9 +139,9 @@ class BooksListTest extends TestCase
 
     public function testTitleSort()
     {
-        $book1 = factory(Book::class)->create(['title' => 'PHP for begginers']);
-        $book2 = factory(Book::class)->create(['title' => 'Javascript for dummies']);
-        $book3 = factory(Book::class)->create(['title' => 'Advanced Python']);
+        $book1 = Book::factory()->create(['title' => 'PHP for begginers']);
+        $book2 = Book::factory()->create(['title' => 'Javascript for dummies']);
+        $book3 = Book::factory()->create(['title' => 'Advanced Python']);
 
         $response = $this->getJson('/api/books?sortColumn=title');
 
@@ -156,23 +157,23 @@ class BooksListTest extends TestCase
 
     public function testAvgReviewSort()
     {
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
 
-        $book1 = factory(Book::class)->create(['title' => 'PHP for begginers']); // 3
-        $book1Review1 = factory(BookReview::class)->make(['review' => 1]);
+        $book1 = Book::factory()->create(['title' => 'PHP for begginers']); // 3
+        $book1Review1 = BookReview::factory()->make(['review' => 1]);
         $book1Review1->user()->associate($user);
-        $book1Review2 = factory(BookReview::class)->make(['review' => 5]);
+        $book1Review2 = BookReview::factory()->make(['review' => 5]);
         $book1Review2->user()->associate($user);
         $book1->reviews()->saveMany([$book1Review1, $book1Review2]);
 
-        $book2 = factory(Book::class)->create(['title' => 'Javascript for dummies']); // 6
-        $book2Review1 = factory(BookReview::class)->make(['review' => 4]);
+        $book2 = Book::factory()->create(['title' => 'Javascript for dummies']); // 6
+        $book2Review1 = BookReview::factory()->make(['review' => 4]);
         $book2Review1->user()->associate($user);
-        $book2Review2 = factory(BookReview::class)->make(['review' => 8]);
+        $book2Review2 = BookReview::factory()->make(['review' => 8]);
         $book2Review2->user()->associate($user);
         $book2->reviews()->saveMany([$book2Review1, $book2Review2]);
 
-        $book3 = factory(Book::class)->create(['title' => 'Advanced Python']); // 0
+        $book3 = Book::factory()->create(['title' => 'Advanced Python']); // 0
 
         $response = $this->getJson('/api/books?sortColumn=avg_review');
 
@@ -188,7 +189,7 @@ class BooksListTest extends TestCase
 
     public function testPagination()
     {
-        $books = factory(Book::class, 30)->create();
+        $books = Book::factory()->count(30)->create();
         $firstPageBooks = $books->forPage(1, 15);
         $secondPageBooks = $books->forPage(2, 15);
 
